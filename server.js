@@ -1,19 +1,33 @@
+// src/server.js
 import express from 'express';
 import cors from 'cors';
-import routes from './src/routes.js';
+import routes from './routes.js';
+import bootstrap from './bootstrap.js';
+import { protect } from './auth.js';
 
 const app = express();
 
-app.use(cors({ origin: '*' }));
-app.use(express.json({ limit: '20mb' }));
+// CORS
+const allow = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
 
-// Health checks
-app.get('/', (_,res)=>res.send('Easycheck API'));
-app.get('/health', (_,res)=>res.json({ ok:true }));
+app.use(cors({ origin: allow, methods: ['GET', 'POST', 'OPTIONS'] }));
+app.use(express.json({ limit: '10mb' }));
 
-// API
+// Health
+app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// Bootstrap (ANTES do protect — permite criar empresa no 1º login)
+app.use('/api', bootstrap);
+
+// Tudo abaixo protegido (token Supabase OU x-easycheck-key)
+app.use(protect);
+
+// Rotas principais da aplicação
 app.use('/api', routes);
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log('API on');
-});
+// Start
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Easycheck API listening on ${port}`));
