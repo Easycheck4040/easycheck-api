@@ -4,11 +4,13 @@ import templates from './templates.js';
 import invoices from './invoices.js';
 import hr from './hr.js';
 import ai from './ai.js';
+import clients from './clients.js';
 
 const r = Router();
 r.use(connections);
 r.use(templates);
 r.use(invoices);
 r.use(hr);
+r.use(clients);
 r.use('/ai', ai);
 export default r;
