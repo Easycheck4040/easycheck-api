@@ -1,22 +1,26 @@
 // src/routes.js
 import { Router } from 'express';
-import connections from './connections.js';
-import templates from './templates.js';
-import invoices from './invoices.js';
-import hr from './hr.js';
-import ai from './ai.js';
-import clients from './clients.js';
-import company from './company.js'; // se já criaste antes
 
 const r = Router();
 
-// Cada módulo expõe as suas próprias rotas (já existentes)
-r.use(connections);
-r.use(templates);
-r.use(invoices);
-r.use(hr);
-r.use(clients);
-r.use(company);
-r.use('/ai', ai);
+// helper: monta módulo se existir (ignora se não existir)
+async function attach(modulePath, mount = '/') {
+  try {
+    const mod = await import(modulePath);
+    r.use(mount, mod.default || mod);
+    console.log('[routes] mounted', modulePath, 'at', mount);
+  } catch (e) {
+    console.warn('[routes] skipped (not found):', modulePath);
+  }
+}
+
+// monta rotas (as que não existirem serão ignoradas)
+await attach('./connections.js');
+await attach('./templates.js');
+await attach('./invoices.js');
+await attach('./hr.js');
+await attach('./clients.js');
+await attach('./company.js');   // ok se não existir
+await attach('./ai.js', '/ai'); // ok se não existir
 
 export default r;
