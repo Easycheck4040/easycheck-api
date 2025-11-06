@@ -2,7 +2,9 @@
   "name": "easycheck-api",
   "type": "module",
   "engines": { "node": ">=18" },
-  "scripts": { "start": "node server.js" },
+  "scripts": {
+    "start": "node src/server.js"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.46.0",
     "cors": "^2.8.5",
